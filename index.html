@@ -1,10 +1,927 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>Azure WebApp Lab</title>
-  </head>
-  <body>
-    <h1>swebapps-azure</h1>
-    <p>Branch: develop / master / main</p>
-  </body>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Mi Static Web App</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Landing page simple para Azure Static Web Apps" />
+
+  <style>
+    /* =========================
+       CONFIGURACIÓN RÁPIDA
+       Cambia colores y fuentes aquí
+    ========================== */
+    :root {
+      --color-bg: #0f172a;
+      --color-bg-light: #111827;
+      --color-primary: #38bdf8;
+      --color-primary-soft: #0ea5e9;
+      --color-text: #e5e7eb;
+      --color-muted: #9ca3af;
+      --color-card-bg: #020617;
+
+      --radius-lg: 16px;
+      --radius-sm: 8px;
+
+      --shadow-soft: 0 10px 35px rgba(15, 23, 42, 0.9);
+
+      --font-main: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: var(--font-main);
+      background: radial-gradient(circle at top, #1e293b 0, #020617 45%, #020617 100%);
+      color: var(--color-text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    img {
+      max-width: 100%;
+      display: block;
+    }
+
+    /* =========================
+       LAYOUT GENERAL
+    ========================== */
+    .page {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 0.5rem 0 1.5rem;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      border-radius: 999px;
+      background: radial-gradient(circle at 30% 20%, #e0f2fe, #0284c7 55%, #0f172a 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      color: white;
+      box-shadow: 0 8px 20px rgba(56, 189, 248, 0.45);
+      font-size: 1.1rem;
+    }
+
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-text span:first-child {
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+
+    .logo-text span:last-child {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+    }
+
+    nav {
+      display: flex;
+      gap: 1.25rem;
+      font-size: 0.9rem;
+      color: var(--color-muted);
+    }
+
+    nav a {
+      position: relative;
+      padding-bottom: 0.15rem;
+    }
+
+    nav a::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      width: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--color-primary), var(--color-primary-soft));
+      transition: width 0.2s ease-out;
+    }
+
+    nav a:hover::after {
+      width: 100%;
+    }
+
+    nav a.active {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .btn-small {
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      padding: 0.4rem 0.9rem;
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      background: rgba(15, 23, 42, 0.55);
+      backdrop-filter: blur(10px);
+      cursor: pointer;
+      transition: border 0.2s ease, background 0.2s ease, transform 0.1s ease;
+    }
+
+    .btn-small:hover {
+      border-color: var(--color-primary);
+      background: rgba(15, 23, 42, 0.9);
+      transform: translateY(-1px);
+    }
+
+    main {
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+    }
+
+    /* =========================
+       HERO PRINCIPAL
+    ========================== */
+    .hero {
+      display: grid;
+      grid-template-columns: minmax(0, 3fr) minmax(0, 2.5fr);
+      gap: 2rem;
+      align-items: center;
+      margin-top: 0.5rem;
+    }
+
+    .hero-text h1 {
+      font-size: clamp(2.1rem, 4vw, 2.7rem);
+      line-height: 1.1;
+      margin-bottom: 0.8rem;
+    }
+
+    .hero-text h1 span.highlight {
+      background: linear-gradient(120deg, #f9fafb, var(--color-primary), #22c55e);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      text-shadow: 0 0 30px rgba(56, 189, 248, 0.35);
+    }
+
+    .hero-subtitle {
+      font-size: 0.96rem;
+      color: var(--color-muted);
+      max-width: 32rem;
+      line-height: 1.5;
+      margin-bottom: 1.3rem;
+    }
+
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.3rem 0.8rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.4);
+      color: var(--color-primary-soft);
+      font-size: 0.75rem;
+      margin-bottom: 0.65rem;
+    }
+
+    .hero-tag span.dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: #22c55e;
+      box-shadow: 0 0 12px rgba(34, 197, 94, 0.9);
+    }
+
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      margin-bottom: 0.7rem;
+    }
+
+    .btn-primary {
+      padding: 0.75rem 1.3rem;
+      border-radius: 999px;
+      border: none;
+      font-weight: 500;
+      font-size: 0.95rem;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-soft));
+      color: #020617;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      box-shadow: 0 15px 35px rgba(8, 47, 73, 0.85);
+      transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, opacity 0.15s ease-out;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 20px 45px rgba(8, 47, 73, 0.98);
+      opacity: 0.95;
+    }
+
+    .btn-outline {
+      padding: 0.75rem 1.2rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+      background: rgba(15, 23, 42, 0.6);
+      color: var(--color-text);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      transition: background 0.2s ease, border 0.2s ease, transform 0.1s ease-out;
+    }
+
+    .btn-outline:hover {
+      background: rgba(15, 23, 42, 0.9);
+      border-color: var(--color-primary);
+      transform: translateY(-1px);
+    }
+
+    .hero-meta {
+      font-size: 0.75rem;
+      color: var(--color-muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.4rem;
+    }
+
+    .hero-meta span {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    .hero-meta span::before {
+      content: "●";
+      font-size: 0.55rem;
+      color: var(--color-primary-soft);
+    }
+
+    /* =========================
+       TARJETA LATERAL (PANEL)
+    ========================== */
+    .hero-panel {
+      background: radial-gradient(circle at top, #0b1120 0, #020617 60%);
+      border-radius: 22px;
+      border: 1px solid rgba(148, 163, 184, 0.45);
+      box-shadow: var(--shadow-soft);
+      padding: 1.2rem 1.1rem 1rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-panel::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 20% 0, rgba(56, 189, 248, 0.17), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(34, 197, 94, 0.17), transparent 60%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .hero-panel-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      align-self: flex-start;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.75);
+      border: 1px solid rgba(56, 189, 248, 0.5);
+      font-size: 0.7rem;
+      color: var(--color-primary-soft);
+    }
+
+    .pill span.icon {
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(8, 47, 73, 0.9);
+      font-size: 0.7rem;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 0.6rem;
+    }
+
+    .panel-title {
+      font-size: 0.95rem;
+      font-weight: 500;
+    }
+
+    .panel-badge {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 999px;
+      background: rgba(22, 163, 74, 0.15);
+      border: 1px solid rgba(34, 197, 94, 0.7);
+      color: #bbf7d0;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .panel-badge::before {
+      content: "✔";
+      font-size: 0.6rem;
+    }
+
+    .panel-description {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+      margin-top: 0.2rem;
+    }
+
+    .panel-grid {
+      margin-top: 0.7rem;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.5rem;
+      font-size: 0.75rem;
+    }
+
+    .panel-item {
+      border-radius: 12px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(30, 64, 175, 0.7);
+      padding: 0.45rem 0.55rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .panel-item h4 {
+      font-size: 0.78rem;
+      font-weight: 500;
+    }
+
+    .panel-item span.meta {
+      font-size: 0.7rem;
+      color: var(--color-muted);
+    }
+
+    .panel-item span.status {
+      font-size: 0.65rem;
+      border-radius: 999px;
+      padding: 0.15rem 0.4rem;
+      align-self: flex-start;
+      background: rgba(15, 118, 110, 0.25);
+      border: 1px solid rgba(45, 212, 191, 0.7);
+      color: #a5f3fc;
+    }
+
+    .panel-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.6rem;
+      padding-top: 0.5rem;
+      border-top: 1px dashed rgba(148, 163, 184, 0.4);
+      font-size: 0.72rem;
+      color: var(--color-muted);
+      gap: 0.5rem;
+    }
+
+    .panel-footer strong {
+      color: #e5e7eb;
+      font-weight: 500;
+    }
+
+    .pill-mini {
+      font-size: 0.68rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.6);
+      background: rgba(15, 23, 42, 0.85);
+    }
+
+    /* =========================
+       SECCIÓN FEATURES / BLOQUES
+    ========================== */
+    section {
+      border-radius: var(--radius-lg);
+      background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      padding: 1.3rem 1.2rem 1.1rem;
+      box-shadow: 0 20px 45px rgba(15, 23, 42, 0.9);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 1rem;
+      margin-bottom: 0.8rem;
+    }
+
+    .section-header h2 {
+      font-size: 1.1rem;
+    }
+
+    .section-header p {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      max-width: 32rem;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.9rem;
+    }
+
+    .feature {
+      border-radius: 14px;
+      padding: 0.8rem;
+      background: radial-gradient(circle at top left, rgba(30, 64, 175, 0.4), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(30, 64, 175, 0.8);
+      box-shadow: 0 10px 30px rgba(15, 23, 42, 0.9);
+    }
+
+    .feature h3 {
+      font-size: 0.95rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .feature p {
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+      margin-bottom: 0.4rem;
+    }
+
+    .feature span.tag {
+      font-size: 0.68rem;
+      border-radius: 999px;
+      padding: 0.15rem 0.45rem;
+      background: rgba(30, 64, 175, 0.55);
+      border: 1px solid rgba(129, 140, 248, 0.9);
+    }
+
+    /* =========================
+       SECCIÓN DETALLES/CONTENIDO
+    ========================== */
+    .two-cols {
+      display: grid;
+      grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.4fr);
+      gap: 1.25rem;
+      align-items: flex-start;
+    }
+
+    .list {
+      font-size: 0.85rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+    }
+
+    .list h3 {
+      font-size: 0.95rem;
+      color: #e5e7eb;
+      margin-bottom: 0.4rem;
+    }
+
+    .list ul {
+      list-style: none;
+      display: grid;
+      gap: 0.25rem;
+    }
+
+    .list li {
+      display: flex;
+      gap: 0.4rem;
+      align-items: flex-start;
+    }
+
+    .list li::before {
+      content: "▹";
+      color: var(--color-primary-soft);
+      font-size: 0.8rem;
+      margin-top: 0.1rem;
+    }
+
+    .card-simple {
+      background: radial-gradient(circle at top, rgba(56, 189, 248, 0.1), rgba(15, 23, 42, 1));
+      border: 1px solid rgba(148, 163, 184, 0.35);
+      border-radius: 14px;
+      padding: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--color-muted);
+      line-height: 1.5;
+    }
+
+    .card-simple h3 {
+      font-size: 0.9rem;
+      margin-bottom: 0.35rem;
+      color: #e5e7eb;
+    }
+
+    .card-simple code {
+      display: inline-block;
+      font-size: 0.75rem;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 0.1rem 0.35rem;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+    }
+
+    /* =========================
+       FOOTER
+    ========================== */
+    footer {
+      margin-top: auto;
+      padding: 0 1.25rem 1.5rem;
+      font-size: 0.75rem;
+      color: var(--color-muted);
+    }
+
+    footer .footer-inner {
+      max-width: 1100px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      border-top: 1px dashed rgba(75, 85, 99, 0.8);
+      padding-top: 0.7rem;
+    }
+
+    footer a {
+      text-decoration: underline;
+      text-decoration-style: dashed;
+      text-underline-offset: 3px;
+    }
+
+    /* =========================
+       RESPONSIVE
+    ========================== */
+    @media (max-width: 880px) {
+      .hero {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .hero-panel {
+        order: -1;
+      }
+
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      nav {
+        order: 3;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .section-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .two-cols {
+        grid-template-columns: minmax(0, 1fr);
+      }
+    }
+
+    @media (max-width: 540px) {
+      .section-grid {
+        grid-template-columns: minmax(0, 1fr);
+      }
+
+      .page {
+        padding-inline: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <!-- ======================
+         HEADER
+    ======================= -->
+    <header>
+      <div class="logo">
+        <div class="logo-icon">SW</div>
+        <div class="logo-text">
+          <span>Static Web App</span>
+          <span>Azure | GitHub | Dev</span>
+        </div>
+      </div>
+
+      <nav>
+        <a href="#inicio" class="active">Inicio</a>
+        <a href="#caracteristicas">Características</a>
+        <a href="#detalles">Detalles</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+
+      <button class="btn-small">
+        <span>★</span>
+        <span>Proyecto demo</span>
+      </button>
+    </header>
+
+    <!-- ======================
+         MAIN
+    ======================= -->
+    <main>
+      <!-- HERO -->
+      <section class="hero" id="inicio">
+        <div class="hero-text">
+          <div class="hero-tag">
+            <span class="dot"></span>
+            <span>Azure Static Web Apps ready</span>
+          </div>
+          <h1>
+            Plantilla base para tu
+            <span class="highlight">landing en Azure</span>
+          </h1>
+          <p class="hero-subtitle">
+            Usa este archivo como punto de partida para tu proyecto.
+            El código está organizado para que puedas cambiar textos, secciones
+            y estilos rápidamente sin romper el diseño.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn-primary">
+              <span>🚀</span>
+              <span>Empezar en GitHub</span>
+            </button>
+
+            <button class="btn-outline">
+              <span>📄</span>
+              <span>Ver documentación</span>
+            </button>
+          </div>
+
+          <div class="hero-meta">
+            <span>HTML + CSS puro</span>
+            <span>Optimizado para Static Web Apps</span>
+            <span>Estructura fácil de extender</span>
+          </div>
+        </div>
+
+        <aside class="hero-panel">
+          <div class="hero-panel-inner">
+            <div class="pill">
+              <span class="icon">⚙</span>
+              <span>Pipeline típico</span>
+            </div>
+
+            <div class="panel-header">
+              <div>
+                <div class="panel-title">Flujo GitHub → Azure</div>
+                <p class="panel-description">
+                  Organiza tu repositorio con ramas <strong>develop</strong>, <strong>master</strong> y
+                  <strong>main</strong>, conectadas a tu Static Web App.
+                </p>
+              </div>
+              <span class="panel-badge">CI/CD activo</span>
+            </div>
+
+            <div class="panel-grid">
+              <div class="panel-item">
+                <h4>develop</h4>
+                <span class="meta">Entorno: Desarrollo</span>
+                <span class="status">Tests locales</span>
+              </div>
+
+              <div class="panel-item">
+                <h4>master</h4>
+                <span class="meta">Entorno: QA / Certificación</span>
+                <span class="status">SAST · SCA</span>
+              </div>
+
+              <div class="panel-item">
+                <h4>main</h4>
+                <span class="meta">Entorno: Producción</span>
+                <span class="status">Deploy estable</span>
+              </div>
+
+              <div class="panel-item">
+                <h4>Seguridad</h4>
+                <span class="meta">GitHub Advanced Security</span>
+                <span class="status">Code Scanning</span>
+              </div>
+            </div>
+
+            <div class="panel-footer">
+              <span>
+                Último deploy:
+                <strong>hace unos minutos</strong>
+              </span>
+              <span class="pill-mini">✅ Status: healthy</span>
+            </div>
+          </div>
+        </aside>
+      </section>
+
+      <!-- FEATURES -->
+      <section id="caracteristicas">
+        <div class="section-header">
+          <div>
+            <h2>Bloques principales del sitio</h2>
+            <p>
+              Estos tres bloques representan la estructura más común de una landing:
+              mensaje principal, beneficios y enfoque técnico. Puedes renombrarlos o duplicarlos
+              según tu necesidad.
+            </p>
+          </div>
+        </div>
+
+        <div class="section-grid">
+          <article class="feature">
+            <h3>01. Mensaje para el negocio</h3>
+            <p>
+              Explica en pocas líneas qué problema resuelves y a quién apuntas.
+              Evita párrafos largos; enfócate en claridad y valor.
+            </p>
+            <span class="tag">Copy corto</span>
+          </article>
+
+          <article class="feature">
+            <h3>02. Características clave</h3>
+            <p>
+              Resume 3–5 puntos fuertes de tu solución: rapidez, seguridad,
+              escalabilidad, costo, experiencia de usuario, etc.
+            </p>
+            <span class="tag">Bullets claros</span>
+          </article>
+
+          <article class="feature">
+            <h3>03. Detalles técnicos</h3>
+            <p>
+              Ideal para describir tu arquitectura, integraciones, repositorios,
+              pipelines y buenas prácticas de DevSecOps.
+            </p>
+            <span class="tag">Stack técnico</span>
+          </article>
+        </div>
+      </section>
+
+      <!-- DETALLES / CONTENIDO -->
+      <section id="detalles">
+        <div class="section-header">
+          <div>
+            <h2>Cómo adaptar esta plantilla a tu proyecto</h2>
+            <p>
+              Aquí tienes una guía rápida para modificar este archivo sin complicarte.
+              Usa este espacio para documentar el flujo de trabajo de tu equipo o los pasos
+              para contribuir al repositorio.
+            </p>
+          </div>
+        </div>
+
+        <div class="two-cols">
+          <div class="list">
+            <h3>Pasos sugeridos</h3>
+            <ul>
+              <li>
+                Cambia el título de la página en la etiqueta
+                <strong>&lt;title&gt;</strong> y los textos principales del hero.
+              </li>
+              <li>
+                Ajusta los colores en la sección <strong>:root</strong> para adaptar
+                el tema a tu marca (primario, fondo, texto, etc.).
+              </li>
+              <li>
+                Renombra o añade secciones duplicando bloques
+                <strong>&lt;section&gt;…&lt;/section&gt;</strong>.
+              </li>
+              <li>
+                Conecta el repositorio a Azure Static Web Apps y define
+                las ramas de origen para cada entorno.
+              </li>
+              <li>
+                Activa <strong>Code Scanning</strong> y <strong>Dependabot</strong>
+                en GitHub para mantener la seguridad del código.
+              </li>
+            </ul>
+          </div>
+
+          <div class="card-simple">
+            <h3>Ejemplo de estructura de proyecto</h3>
+            <p>
+              Estructura mínima para trabajar con GitHub y Azure Static Web Apps:
+            </p>
+            <p>
+              <code>/.github/workflows/staticwebapp.yml</code><br />
+              <code>/index.html</code><br />
+              <code>/assets/css/ (si deseas separar estilos)</code><br />
+              <code>/assets/img/</code>
+            </p>
+            <p>
+              Puedes copiar este archivo como <strong>index.html</strong> en la raíz del repo
+              y luego ir moviendo estilos a un <strong>.css</strong> externo cuando el proyecto crezca.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTACTO / CTA -->
+      <section id="contacto">
+        <div class="section-header">
+          <div>
+            <h2>Contacto o siguiente paso</h2>
+            <p>
+              Usa esta sección como formulario, CTA para agendar una reunión, o datos de contacto
+              del equipo (correo, Teams, links a documentación interna, etc.).
+            </p>
+          </div>
+        </div>
+
+        <div class="two-cols">
+          <div class="list">
+            <h3>Información básica</h3>
+            <ul>
+              <li>Responsable técnico del repositorio.</li>
+              <li>Responsable de seguridad / AppSec.</li>
+              <li>URL del tablero de trabajo (Azure Boards / Jira / GitHub Projects).</li>
+              <li>Guía rápida para levantar el proyecto en local.</li>
+            </ul>
+          </div>
+
+          <div class="card-simple">
+            <h3>Ejemplo de datos de contacto</h3>
+            <p>
+              Correo del equipo:
+              <strong>equipo-dev@tudominio.com</strong><br />
+              Canal de Teams:
+              <strong>#squad-static-webapp</strong><br />
+              Documentación técnica:
+              <strong>https://tudominio.com/docs</strong>
+            </p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="footer-inner">
+      <span>© <span id="year"></span> · Static Web App base template.</span>
+      <span>
+        Edita este archivo en
+        <a href="#inicio">index.html</a>.
+      </span>
+    </div>
+  </footer>
+
+  <script>
+    // Solo para mantener el año actualizado automáticamente
+    document.getElementById("year").textContent = new Date().getFullYear();
+  </script>
+</body>
 </html>
