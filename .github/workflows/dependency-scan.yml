@@ -1,0 +1,21 @@
+name: Dependency Scan (OSV)
+
+on:
+  push:
+    branches: [ develop, master, main ]
+  pull_request:
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install osv-scanner
+        run: |
+          curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_$(uname -s)_amd64 \
+          -o osv-scanner
+          chmod +x osv-scanner
+
+      - name: Run scan
+        run: ./osv-scanner --recursive .
