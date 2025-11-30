@@ -1,0 +1,38 @@
+name: Dependency Scan (OSV)
+
+on:
+  push:
+    branches: [ develop, master, main ]
+  pull_request:
+    branches: [ develop, master, main ]
+
+jobs:
+  osv-scan:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check if dependencies exist
+        id: deps
+        run: |
+          if ls **/package.json >/dev/null 2>&1; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Install osv-scanner
+        if: steps.deps.outputs.found == 'true'
+        run: |
+          curl -L https://github.com/google/osv-scanner/releases/latest/download/osv-scanner_${{ runner.os }}_amd64 \
+            -o osv-scanner
+          chmod +x osv-scanner
+
+      - name: Run scan
+        if: steps.deps.outputs.found == 'true'
+        run: ./osv-scanner --recursive .
+
+      - name: Skip scan (no dependencies)
+        if: steps.deps.outputs.found == 'false'
+        run: echo "No dependencies found — skipping OSV scan."
